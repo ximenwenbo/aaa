@@ -1,0 +1,135 @@
+<script type="text/javascript">
+    //定义一个全局的“缓存属性”信息的变量
+    var cache_attr = [];
+
+    //类型 变换调用函数，显示对应的属性信息
+    function show_attribute(){
+        //获得选取好的类型信息
+        var type_id = parseInt($('[name=type_id]').val());
+
+        //判断缓存中是否有要显示的属性信息
+        if(typeof cache_attr[type_id]!=='undefined'){
+            $('tbody').html(cache_attr[type_id]);
+            return false;
+        }
+
+        //利用Ajax调用服务器端获得对应的属性信息
+        $.ajax({
+            url:'{:url("showattribute")}',
+            data:{type_id:type_id},
+            dataType:'json',
+            success:function(msg){
+                //console.log(msg);
+                //msg数据部分 与 html中的tr、td结合显示给页面
+                //<tr class="text-c"><td><input type="checkbox" value="1" name=""></td><td>2</td><td>颜色</td><td>手机</td><td>单选</td><td>白色,黑色,红色</td><td>1970-01-01 08:00:00</td><td class="td-manage"><a title="属性列表" href="/admin/attribute/index/attr_id/2.html" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">属性列表</i></a><a title="编辑" href="javascript:;" onclick="member_edit('编辑','/admin/attribute/xiugai/attr_id/2.html','4','','510')" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont"></i></a><a title="删除" href="javascript:;" onclick="member_del(this,2)" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont"></i></a></td></tr>
+
+                var htmlcont = ""; //空变量
+                $.each(msg,function(i,v){
+                    htmlcont += '<tr class="text-c">';
+                    htmlcont += '<td><input type="checkbox" value="1" name=""></td>';
+                    htmlcont += '<td>'+v.attr_id+'</td>';
+                    htmlcont += '<td>'+v.attr_name+'</td>';
+                    htmlcont += '<td>'+v.type.type_name+'</td>';
+                    htmlcont += '<td>'+(v.attr_sel=='only'?'唯一':'单选')+'</td>';
+                    htmlcont += '<td>'+v.attr_vals+'</td>';
+                    htmlcont += '<td>'+v.create_time+'</td>';
+                    htmlcont += '<td class="td-manage"><a title="编辑" href="javascript:;" onclick="member_edit(\'编辑\',\'/admin/attribute/xiugai/attr_id/2.html\',\'4\',\'\',\'510\')" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont"></i></a><a title="删除" href="javascript:;" onclick="member_del(this,2)" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont"></i></a></td>';
+                    htmlcont += '</tr>';
+                });
+
+                //把获得好的属性信息放到缓存变量里边，供下次重复使用
+                cache_attr[type_id] = htmlcont;
+
+                //把htmlcont追加给页面显示
+                $('tbody').html(htmlcont);
+            }
+        });
+    }
+
+    //页面加载完毕，就自动调用一次show_attribute()函数
+    //使得默认选中类型的属性展示出来
+    $(function(){
+        show_attribute()
+    });
+
+    /*编辑*/
+    function member_edit(title,url,id,w,h){
+        layer_show(title,url,w,h);
+    }
+
+
+
+    /*删除*/
+    function member_del(obj,id){
+        layer.confirm('确认要删除吗？',function(){
+            $.ajax({
+                url:'{:url("shanchu")}',
+                type: 'POST',
+                dataType: 'json',
+                data:{goods_id:id},
+                success: function(msg){
+                    if(msg.status=='success'){
+                        //删除页面角色对应的tr
+                        $(obj).closest('tr').remove();
+                        layer.msg('已删除!',{icon:1,time:1000});  //做1s种的弹框提示
+                    }
+                }
+            });
+        });
+    }
+
+
+    /*添加*/
+    function member_add(title,url,w,h){
+        layer_show(title,url,w,h);
+    }
+    /*查看*/
+    function member_show(title,url,id,w,h){
+        layer_show(title,url,w,h);
+    }
+    /*停用*/
+    function member_stop(obj,id){
+        layer.confirm('确认要停用吗？',function(index){
+            $.ajax({
+                type: 'POST',
+                url: '',
+                dataType: 'json',
+                success: function(data){
+                    $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="member_start(this,id)" href="javascript:;" title="启用"><i class="Hui-iconfont">&#xe6e1;</i></a>');
+                    $(obj).parents("tr").find(".td-status").html('<span class="label label-defaunt radius">已停用</span>');
+                    $(obj).remove();
+                    layer.msg('已停用!',{icon: 5,time:1000});
+                },
+                error:function(data) {
+                    console.log(data.msg);
+                },
+            });
+        });
+    }
+
+    /*启用*/
+    function member_start(obj,id){
+        layer.confirm('确认要启用吗？',function(index){
+            $.ajax({
+                type: 'POST',
+                url: '',
+                dataType: 'json',
+                success: function(data){
+                    $(obj).parents("tr").find(".td-manage").prepend('<a style="text-decoration:none" onClick="member_stop(this,id)" href="javascript:;" title="停用"><i class="Hui-iconfont">&#xe631;</i></a>');
+                    $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">已启用</span>');
+                    $(obj).remove();
+                    layer.msg('已启用!',{icon: 6,time:1000});
+                },
+                error:function(data) {
+                    console.log(data.msg);
+                },
+            });
+        });
+    }
+
+    /*密码-修改*/
+    function change_password(title,url,id,w,h){
+        layer_show(title,url,w,h);
+    }
+
+</script>

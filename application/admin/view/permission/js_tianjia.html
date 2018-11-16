@@ -1,0 +1,33 @@
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript">
+
+    //页面加载完毕后，给form表单设置submit提交事件
+    $(function(){
+        $('#form-member-add').submit(function(evt){
+            evt.preventDefault();//阻止浏览器提交动作
+            var shuju = $(this).serialize(); //收集form表单信息
+
+            //ajax传递数据到服务器端存储
+            $.ajax({
+                url:'{:url("tianjia")}',    // /admin/permission/tianjia
+                data:shuju,
+                dataType:'json',
+                type:'post',
+                success:function(msg){
+                    if(msg.status=='success'){
+                        layer.alert('添加权限成功',{icon:6},function(){
+                            //下述① 和 ②执行执行顺序要求
+                            //① 在"父级"页面把新添加权限刷新出来
+                            parent.window.location.href=parent.window.location.href;
+                            //② 关闭添加权限的弹框表单页面
+                            layer_close();
+                        });
+                    }else{
+                        layer.alert('添加权限失败【'+msg.errorinfo+'】',{icon:5});
+                    }
+                }
+            });
+        });
+    });
+</script>
+<!--/请在上方写此页面业务相关的脚本-->

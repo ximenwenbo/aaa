@@ -1,0 +1,235 @@
+<script type="text/javascript">
+    var setting = {
+        edit:{
+            //激活 编辑、删除 按钮显示，默认是显示状态
+            enable:true,
+            //设置 鼠标划过按钮对应的文字提示
+            removeTitle: "删除",
+            renameTitle: "编辑",
+            //"节点名称"被点击修改按钮后就进入全选状态
+            editNameSelectAll: true,
+            //通过setRemoveBtn函数的返回信息决定是否显示“删除”按钮
+            showRemoveBtn: setRemoveBtn,
+
+        },
+        data: {
+            key:{
+                //重置表现数据的name名称
+                name:'cat_name',
+            },
+            simpleData: {
+                //通过“简易”方式表现要输出的数据
+                enable: true,
+                //重置数据中的id和pid字段名称
+                idKey:'cat_id',
+                pIdKey:'cat_pid',
+            },
+        },
+        callback: {
+            //对节点做相关操作(删除、拖拽、点击、右键点击等等)的事件回调函数
+
+            //节点被删除"前"要做的事情(通过函数定义体现)
+            beforeRemove: zTreeBeforeRemove,
+            //节点被删除“后”做的事情
+            onRemove: zTreeOnRemove,
+            //节点被修改之前的事件回调处理
+            beforeRename: zTreeBeforeRename,
+            //节点完成页面级“修改”动作后的事件回调处理
+            onRename: zTreeOnRename,
+        },
+        view: {
+            //鼠标移入节点，显示“添加”按钮
+            addHoverDom: addHoverDom,
+            //鼠标移出节点，删除“添加”按钮
+            removeHoverDom: removeHoverDom,
+        }
+    };
+
+    var newCount = 1;  //计数器
+    //鼠标移入节点设置“添加”按钮
+    //@param treeId: 树的名字"mytree",容器id的属性值
+    //@param treeNode: 正在被操作的zTree树节点对象
+    function addHoverDom(treeId, treeNode) {
+        //console.log(treeNode.tId);//mytree_11,11是序号，所有节点从上到下排序的信息，从1开始
+
+        //$('#mytree_11_span')  获得页面节点对象[树节点名称的span元素对象]
+        var sObj = $("#" + treeNode.tId + "_span");
+
+        //判断添加按钮是否已经显示，已经显示就停止后续执行
+        if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+
+        var addStr = "<span class='button add' id='addBtn_" + treeNode.tId
+            + "' title='添加' onfocus='this.blur();'></span>";
+
+        sObj.after(addStr);  //给节点名称后边追加兄弟关系的“添加”按钮节点
+
+        //获得“添加”按钮的元素节点对象
+        var btn = $("#addBtn_"+treeNode.tId);
+
+        //判断“添加”按钮ok，并给绑定click点击事件
+        if (btn) btn.bind("click", function(){
+            //限制只能添加3个层级节点
+            if(treeNode.cat_level>1){
+                layer.alert('分类层级最多是3个',{icon:5});
+                return false;
+            }
+
+            //获得整个大树的结构(对象)
+            var zTree = $.fn.zTree.getZTreeObj("mytree");
+            //开始给treeNode添加子节点
+            //接收新添加好的节点
+            //addNodes会返回新添加好的节点，但是是通过"数组对象集"形式体现(无视添加节点个数)
+            //需要通过“news[下标]”方式获得新添加的子节点的
+            var news = zTree.addNodes(treeNode,{
+                    cat_id:0,
+                    cat_pid:treeNode.cat_id,
+                    cat_name:"new node" + (newCount++),
+                    cat_level:parseInt(treeNode.cat_level)+1
+                });
+            //console.log(news);  //[{}] 形式体现
+            //使得新添加节点进入"编辑"状态
+            //console.log(news);
+            zTree.editName(news[0]);
+
+            return false;
+        });
+    };
+    //鼠标移出节点删除“添加”按钮
+    function removeHoverDom(treeId, treeNode) {
+        //获得添加按钮元素对象并删除之(同时还有去除所有事件操作)
+        $("#addBtn_"+treeNode.tId).unbind().remove();
+    };
+
+
+    //节点“修改”之前判断修改好的名字"非空",否则禁止修改
+    //@param newName: 修改后的新名称
+    function zTreeBeforeRename(treeId, treeNode, newName, isCancel) {
+        //确保节点名称"非空"
+        if(newName==''){
+            layer.alert('节点名称不能为空',{icon:5});
+            return false;
+        }
+        return true;
+    }
+
+    //【修改、添加节点兼容处理】
+    //页面级节点修改完毕后，要通过“Ajax”去服务器端完成数据库修改
+    //@param event: 事件对象
+    //@param treeId: 树的名字"mytree",容器id的属性值
+    //@param treeNode: 被修改的zTree树节点对象
+    function zTreeOnRename(event, treeId, treeNode) {
+        //treeNode.cat_name:可以获得被"修改后"的节点名称
+        $.ajax({
+            url:'{:url("xiugai")}',
+            data:{
+                cat_id:treeNode.cat_id,
+                cat_name:treeNode.cat_name,
+                cat_pid:treeNode.cat_pid,
+                cat_level:treeNode.cat_level,
+            },
+            dataType:'json',
+            type:'post',
+            success:function(msg){
+                if(msg.status=='failure'){
+                    layer.msg(msg.info,{icon:5,time:2000});
+                }else{
+                    //把服务区端生成新节点的cat_id更新到页面对应节点身上
+                    treeNode.cat_id = msg.cat_id;
+
+                    layer.msg(msg.info,{icon:6,time:2000});
+                }
+            }
+        });
+    }
+
+    //节点删除后要去服务器端把数据库中对应的节点也删除
+    //具体通过"Ajax"去实现
+    //@param event: 事件对象
+    //@param treeId: 树的名字
+    //@param treeNode: 被删除的zTree树节点对象
+    function zTreeOnRemove(event, treeId, treeNode){
+        $.ajax({
+            url:'{:url("shanchu")}',
+            data:{cat_id:treeNode.cat_id},
+            dataType:'json',
+            type:'post',
+            success:function(msg){
+                if(msg.status=='failure'){
+                    layer.msg('节点删除失败，请联系管理员',{icon:5,time:2000});
+                }else{
+                    layer.msg('删除成功',{icon:6,time:2000});
+                }
+            }
+        });
+    }
+
+    //节点被删除前触发执行的函数
+    //@param treeNode: 代表被删除的树节点对象
+    function zTreeBeforeRemove(treeId, treeNode){
+        if(confirm('确认要删除【'+treeNode.cat_name+'】节点么')){
+            return true;
+        }
+        return false;
+    }
+
+    /*
+        判断节点是否是父节点，返回boolean值
+        并决定是否显示删除按钮
+        返回true:显示
+        返回false:不显示
+     */
+    function setRemoveBtn(treeId, treeNode) {
+        //treeNode:代表被触碰到的"树节点对象"
+        //         可以获得到cat_id/cat_name/cat_pid/cat_level等数据库的字段信息
+        //         也可以获得其他的功能成员[方法/属性]
+        //console.log(treeNode);
+        return !treeNode.isParent;  //非父节点返回true，否则返回false
+    }
+
+    //生成zTree的根节点分类信息
+    function add_root(){
+        //获得整个大树的结构(对象)
+        var zTree = $.fn.zTree.getZTreeObj("mytree");
+        //给zTree添加根节点
+        var news = zTree.addNodes(null,{
+            cat_id:0,
+            cat_pid:0,
+            cat_name:"new node" + (newCount++),
+            cat_level:0
+        });
+        //使得新添加节点进入"编辑"状态
+        zTree.editName(news[0]);
+    }
+//    var zNodes =[
+//        { cat_id:1, cat_pid:0, cat_name:"家用电器", open:true},
+//        { cat_id:11, cat_pid:1, cat_name:"厨房电器"},
+//        { cat_id:111, cat_pid:11, cat_name:"高压锅"},
+//        { cat_id:112, cat_pid:11, cat_name:"电饭锅"},
+//        { cat_id:113, cat_pid:11, cat_name:"油烟机"},
+//        { cat_id:114, cat_pid:11, cat_name:"冰箱"},
+//        { cat_id:2, cat_pid:0, cat_name:"服装",open:true},
+//        { cat_id:12, cat_pid:2, cat_name:"男装"},
+//        { cat_id:122, cat_pid:12, cat_name:"衬衫"},
+//        { cat_id:3, cat_pid:0, cat_name:"通讯"},
+//        { cat_id:13, cat_pid:3, cat_name:"手机"},
+//        { cat_id:133, cat_pid:13, cat_name:"游戏手机"},
+//        { cat_id:134, cat_pid:13, cat_name:"音乐手机"},
+//        { cat_id:135, cat_pid:13, cat_name:"智能手机"},
+//        { cat_id:14, cat_pid:3, cat_name:"路由器"},
+//        { cat_id:15, cat_pid:3, cat_name:"手机配件"}
+//    ];
+
+    $(function(){
+        //页面加载完毕，初始化显示树结构
+        //Ajax去服务器端通过数据库获得用于显示的树的数据
+        $.ajax({
+            url:'{:url("getcatinfo")}',
+            dataType:'json',
+            success:function(msg){
+                $.fn.zTree.init($("#mytree"), setting, msg);
+            }
+        });
+    });
+
+</script>
+

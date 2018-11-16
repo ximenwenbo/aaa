@@ -1,0 +1,111 @@
+{include file="pub/head" /}
+
+<title>订单管理</title>
+
+<style type="text/css">
+	/*分页样式*/
+	.pagination li{list-style:none;float:left;margin-left:10px;
+		padding:0 10px;
+		background-color:#5a98de;
+		border:1px solid #ccc;
+		height:26px;
+		line-height:26px;
+		cursor:pointer;
+		color:#fff;
+	}
+	.pagination li a{color:white;}
+	.pagination li.active{background-color:white;color:gray;}
+	.pagination li.disabled{background-color:white;color:gray;}
+</style>
+
+</head>
+<body>
+
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 订单中心 <span class="c-gray en">&gt;</span> 订单管理 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+	{literal}
+	<div class="text-c"> 日期范围：
+		<input type="text" onfocus="WdatePicker({ maxDate:'#F{$dp.$D(\'datemax\')||\'%y-%M-%d\'}' })" id="datemin" class="input-text Wdate" style="width:120px;">
+		-
+		<input type="text" onfocus="WdatePicker({ minDate:'#F{$dp.$D(\'datemin\')}',maxDate:'%y-%M-%d' })" id="datemax" class="input-text Wdate" style="width:120px;">
+		<input type="text" class="input-text" style="width:250px" placeholder="输入会员名称、电话、邮箱" id="" name="">
+		<button type="submit" class="btn btn-success radius" id="" name=""><i class="Hui-iconfont">&#xe665;</i> 搜订单</button>
+	</div>
+	{/literal}
+	<div class="cl pd-5 bg-1 bk-gray mt-20"> <span class="l"><a href="javascript:;" onclick="datadel()" class="btn btn-danger radius"><i class="Hui-iconfont">&#xe6e2;</i> 批量删除</a>
+
+		<a href="javascript:;" onclick="member_add('添加订单','{:url(\'tianjia\')}','','510')" class="btn btn-primary radius"><i class="Hui-iconfont">&#xe600;</i> 添加订单</a>
+
+	</span> <span class="r">共有数据：<strong>88</strong> 条</span> </div>
+	<div class="mt-20">
+	<table class="table table-border table-bordered table-hover table-bg table-sort">
+		<thead>
+			<tr class="text-c">
+				<th width="25"><input type="checkbox" name="" value=""></th>
+				<th width="30">ID</th>
+				<th width="230">订单编号</th>
+				<th width="60">会员</th>
+				<th width="70">订单总金额</th>
+				<th width="40">付款否</th>
+				<th width="130">生成时间</th>
+				<th width="*">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			{volist name="orderinfos" id="v" }
+			<tr class="text-c">
+				<td><input type="checkbox" value="1" name=""></td>
+				<td>{$v.order_id}</td>
+				<td><span style="cursor: pointer;color:cornflowerblue;"
+						  onclick="order_show('查看订单详情','{:url(\'detail\',[\'order_id\'=>$v.order_id])}')"
+						  title="查看详情">
+						{$v.order_number}</span></td>
+				<td>{$v.user.user_name}</td>
+				<td>{$v.order_price}</td>
+				<td>{$v.order_status ? '<input class="btn btn-success radius" type="button" value="是" />':'否'}</td>
+				<td>{$v.create_time}</td>
+				<td class="td-manage">
+					<a title="编辑" href="javascript:;"
+					   onclick="member_edit('编辑','{:url(\'xiugai\',[\'order_id\'=>$v.order_id])}','4','','510')"
+					   class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe6df;</i></a>
+					<a title="删除" href="javascript:;" onclick="member_del(this,{$v.order_id})"
+					   class="ml-5" style="text-decoration:none">
+						<i class="Hui-iconfont">&#xe6e2;</i></a>
+				</td>
+			</tr>
+			{/volist}
+			<tr><td colspan="100">{$pagelist}</td></tr>
+		</tbody>
+	</table>
+	</div>
+</div>
+
+{include file="order/js_index" /}
+
+{include file="pub/foot" /}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

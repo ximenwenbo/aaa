@@ -1,0 +1,24 @@
+{include file='pub/head2' /}
+
+		<title>支付页-成功</title>
+		<link rel="stylesheet" type="text/css" href="{:config('home_css')}pages-paysuccess.css" />
+		<!--主内容-->
+		<div class="paysuccess">
+			<div class="success">
+				<h3><img src="{:config('home_img')}_/right.png" width="48" height="48">　恭喜您，支付成功啦！</h3>
+				<div class="paydetail">
+				<p>订单编号：{$Request.get.out_trade_no}</p>
+				<p>支付金额：￥{$Request.get.total_amount}元</p>
+				<p class="button"><a href="myOrder.html" class="sui-btn btn-xlarge btn-danger">查看订单</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="index.html" class="sui-btn btn-xlarge ">继续购物</a></p>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	<!-- 底部栏位 -->
+{include file='pub/foot2' /}
+
+<script type="text/javascript" src="{:config('home_js')}all.js"></script>
+</body>
+
+</html>

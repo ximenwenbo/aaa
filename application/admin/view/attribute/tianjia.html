@@ -1,0 +1,78 @@
+{include file="pub/head" /}
+
+<title>添加属性 - H-ui.admin v3.1</title>
+<meta name="keywords" content="H-ui.admin v3.1,H-ui网站后台模版,后台模版下载,后台管理系统模版,HTML后台模版下载">
+<meta name="description" content="H-ui.admin v3.1，是一款由国人开发的轻量级扁平化网站后台模板，完全免费开源的网站后台管理系统模版，适合中小型CMS后台系统。">
+</head>
+<body>
+<article class="page-container">
+	<form action="" method="post" class="form form-horizontal" id="form-member-add">
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>属性名称：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" value=""  name="attr_name" />
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>所属类型：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<select name="type_id">
+					<option value="0">-请选择-</option>
+					{volist name=':get_type_info()' id='v'}
+					<option value="{$v.type_id}">{$v.type_name}</option>
+					{/volist}
+				</select>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">是否可选：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="radio"  value="only"  name="attr_sel" checked="checked"/>唯一
+				<input type="radio"  value="many"  name="attr_sel" />单选
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">可选值列表：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<textarea name="attr_vals" cols="50" rows="4"></textarea>
+				<br />
+				<span style="color:gray;">多个可选址通过','分隔，例如 红色,蓝色,绿色</span>
+			</div>
+		</div>
+
+		<div class="row cl">
+			<div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+				<input class="btn btn-primary radius" type="submit" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">
+			</div>
+		</div>
+	</form>
+</article>
+
+{include file="attribute/js_tianjia" /}
+
+{include file="pub/foot" /}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

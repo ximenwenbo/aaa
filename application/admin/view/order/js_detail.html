@@ -1,0 +1,39 @@
+<script type="text/javascript">
+
+    /**
+     * 地图应用
+     */
+    var address = ""; //声明“全局”收获地址变量
+    $(function(){
+        //定义map变量 调用 qq.maps.Map() 构造函数   获取地图显示容器
+        var map = new qq.maps.Map(document.getElementById("address_map"), {
+            center: new qq.maps.LatLng(39.916527,116.397128),      // 地图的中心地理坐标。
+            //设置地图放大的参数
+            zoom:15,
+            scaleControl:true,
+        });
+
+        //调用地址解析类
+        geocoder = new qq.maps.Geocoder({
+            complete : function(result){
+                map.setCenter(result.detail.location);
+                var marker = new qq.maps.Marker({
+                    map:map,
+                    position: result.detail.location
+                });
+
+                //设置显示覆盖物(下述代码被放到了当前位置，因为需要使用地址解析的marker变量)
+                var infoWin = new qq.maps.InfoWindow({
+                    map: map
+                });
+                infoWin.open();
+                //tips  自定义内容
+                infoWin.setContent('<div>'+address+'</div>');
+                infoWin.setPosition(marker);  //设置覆盖物位置与“地址”位置一致
+            }
+        });
+        //根据地址显示地图
+        address = $('#cgn_address').html(); //地址
+        geocoder.getLocation(address);
+    });
+</script>

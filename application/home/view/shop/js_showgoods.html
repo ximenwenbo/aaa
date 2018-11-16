@@ -1,0 +1,57 @@
+<script type="text/javascript">
+    //购物车删除商品
+    function del_goods(obj,uid){
+        layer.confirm('确认要删除该商品么',function(index){
+            //触发执行Ajax实现调用服务器端删除商品
+            $.ajax({
+                url:'{:url("del")}',
+                data:{uid:uid},
+                dataType:'json',
+                type:'post',
+                success:function(info){
+                    //删除商品的页面dom元素
+                    $(obj).closest('.cart-list').remove();
+                    //更新总数量、总价格
+                    $('#total_number').html(info.cnumber);
+                    $('.summoney').html('¥'+info.cprice);
+                }
+            });
+            layer.close(index); //清除确认框弹层
+        });
+    }
+
+
+    //购物车修改商品数量
+    //uid：购物车商品标志
+    //obj：数量input框的dom对象
+    function modify_num(obj,uid){
+        //num：修改后购买数量
+        var num = parseInt($(obj).val());
+        //修改数量要求不能小于1
+        if(num<1){
+            layer.msg('商品数量要求大于等于1',{icon:5,time:3000},function(){
+                //刷新页面，找回商品原数量
+                window.location.href=window.location.href;
+            });
+            //阻止后续代码执行
+            return false;
+        }
+        //利用Ajax触发请求服务器端，实现购物车商品数量修改
+        $.ajax({
+            url:'{:url("xiugainum")}',
+            data:{uid:uid,num:num},
+            dataType:'json',
+            type:'post',
+            success:function(info){
+                //console.log(info);//{cnumber: 6, cprice: 4112.35, cgoods_price_sum: 666.44}
+                //更新当前商品的小计价格
+                $('#'+uid).html(info.cgoods_price_sum);
+                //更新全部商品的总数量
+                $('#total_number').html(info.cnumber);
+                //更新全部商品的总价格
+                $('.summoney').html(info.cprice);
+            }
+        });
+    }
+</script>
+

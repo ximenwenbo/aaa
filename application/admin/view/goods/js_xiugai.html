@@ -1,0 +1,417 @@
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript">
+    //给秒杀商品设置开始时间、结束时间 的“时间选取器”效果
+    jeDate("#start_time",{
+        //jeDate.nowDate():  获得当前日期时间
+        minDate:jeDate.nowDate(),              //最小日期
+        maxDate:function(){
+            //2099-12-31 或 设置好的结束时间
+            var end = $('#end_time').val();
+            return end ? end : '2099-12-31'
+        },              //最大日期
+        format: "YYYY-MM-DD hh:mm:ss"
+    });
+    jeDate("#end_time",{
+        //最小时间：“开始时间”存在情况下，等于开始时间，否则等于当前时间
+        //minDate:jeDate.nowDate(),              //最小日期
+        //minDate:回调函数返回值赋值,
+        minDate:function(){
+            //当前时间 或 设置好的开始时间
+            var start = $('#start_time').val();
+            return start ? start : jeDate.nowDate();
+        },
+        maxDate:"2099-12-31",              //最大日期
+        format: "YYYY-MM-DD hh:mm:ss"
+    });
+
+
+
+    //商品pics相册图片上传维护
+    $(function(){
+        new HHuploadify({
+            container: '#goodspics', //上传按钮容器
+            auto: true,             //选择图片后自动上传
+            //single: true,           //每次只能上传一张图片
+            chooseText: '上传相册',     //上传图片按钮文字提示
+            url: '{:url("pics_up")}',       //上传图片服务器端接收处理地址
+            field: 'mypics',        //定义一个mypics的名字，代表服务器端是通过$_FILES['mypics']的方式接收附件
+
+            //当前“上传插件”绘制完毕，做初始化工作
+            //判断商品有默认logo图片就显示
+            //onInit:插件准备好后"自动"执行的方法
+            onInit:function(){
+                var exists_pics = $('#exists_pics').html();
+                if(exists_pics!=''){
+                    exists_pics = JSON.parse($('#exists_pics').html());
+                    //对 上传插件 的files属性赋值
+                    this.options.files = exists_pics;
+                }
+            },
+
+            //获得服务器端返回回来的图片上传相关信息
+            //hhuploadify本身有 onUploadSuccess 事件，表示服务器图片上传成功后要调用执行
+            //参数file：是当前正在被上传附件的客户端浏览器的dom表现形式
+            //参数msg：代表服务器端返回的数据，字符串格式
+            onUploadSuccess:function(file,msg){
+                var obj = JSON.parse(msg);  //{'status'=>success','bigpathname'=>xx,'midpathname'=>xx}
+                if(obj.status=='success'){
+
+                    //把当前上传相册图片的id属性值获得到
+                    var flag_id = file.element.id;  //uploadify-1533886771260-2
+
+                    //把图片(大图/中图)路径名"表单域"制作好并添加进pics_area的占位区域里边
+                    var biginput = '<input type="hidden" name="picture_big[]" value="'+obj.bigpathname+'" class="'+flag_id+'">';
+                    var midinput = '<input type="hidden" name="picture_mid[]" value="'+obj.midpathname+'" class="'+flag_id+'">';
+
+                    $('#pics_area').append(biginput);
+                    $('#pics_area').append(midinput);
+
+                    layer.msg('上传图片成功',{icon:6,time:3000});
+                }else{
+                    layer.msg('上传图片失败【'+obj.errorinfo+'】',{icon:5,time:3000});
+                }
+            },
+
+            //上传图片被删除后触发执行的事件函数
+            //清除goods_logo的图片路径名信息
+            onRemoved:function(file){
+                //file: 被删除图片的对应的“dom对象”
+                //console.log(file);
+                if(typeof file.path !='undefined'){
+                    //A. 已有图片删除
+                    //通过Ajax传递path到服务器端(删除数据记录和物理图片)
+                    $.ajax({
+                        url:'{:url("pics_del")}',
+                        data:{midpath:'.'+file.path},
+                        dataType:'json',
+                        type:'post',
+                        success:function(msg){
+                            if(msg.status=='success'){
+                                layer.msg('服务器删除成功',{icon:6,time:3000});
+                            }
+                        }
+                    });
+                }else{
+                    //B. 新上传图片
+                    //获得被删除图片的span元素id属性值
+                    var flag_id= file.element.id;
+                    //通过flag_id找到被删除相册的"大图"、"中图"的input表单域并删除
+                    $('.'+flag_id).remove();
+                }
+            }
+        })
+    });
+
+
+    //商品logo图片上传维护
+    $(function(){
+        new HHuploadify({
+            container: '#goodslogo', //上传按钮容器
+            auto: true,             //选择图片后自动上传
+            single: true,           //每次只能上传一张图片
+            chooseText: '上传图片',     //上传图片按钮文字提示
+            url: '{:url("logo_up")}',       //上传图片服务器端接收处理地址
+            field: 'mylogo',        //定义一个mylogo的名字，代表服务器端是通过$_FILES['mylogo']的方式接收附件
+//            files: [    //显示商品原有的图片效果
+//                {
+//                    path: $('#goods_logo').val(),
+//                },
+//            ],
+
+            //当前“上传插件”绘制完毕，做初始化工作
+            //判断商品有默认logo图片就显示
+            //onInit:插件准备好后"自动"执行的方法
+            onInit:function(){
+                var goods_logo = $('#goods_logo').val();
+                if(goods_logo!=''){
+                    //对 上传插件 的files属性赋值
+                    this.options.files = [{path:goods_logo}];
+                }
+            },
+
+
+            //获得服务器端返回回来的图片上传相关信息
+            //hhuploadify本身有 onUploadSuccess 事件，表示服务器图片上传成功后要调用执行
+            //参数file：是当前正在被上传附件的客户端浏览器的dom表现形式
+            //参数msg：代表服务器端返回的数据，字符串格式
+            onUploadSuccess:function(file,msg){
+                //console.log(msg);
+                var obj = JSON.parse(msg);
+                if(obj.status=='success'){
+                    //把图片路径名信息添加进form表单域里边
+                    $('[name=goods_logo]').val(obj.pathfilename);
+                    layer.msg('上传图片成功',{icon:6,time:3000});
+                }else{
+                    layer.msg('上传图片失败【'+obj.errorinfo+'】',{icon:5,time:3000});
+                }
+            },
+            //上传图片被删除后触发执行的事件函数
+            //清除goods_logo的图片路径名信息
+            onRemoved:function(file){
+                //file: 被删除图片的客户端“dom对象”体现
+                $('#goods_logo').val('');
+            }
+        })
+    });
+
+
+    /*描述大树01*/
+    var setting = {
+        data: {
+            key:{
+                //重置表现数据的name名称
+                name:'cat_name',
+            },
+            simpleData: {
+                //通过“简易”方式表现要输出的数据
+                enable: true,
+                //重置数据中的id和pid字段名称
+                idKey:'cat_id',
+                pIdKey:'cat_pid',
+            },
+        },
+        callback:{
+            onClick:zTreeOnClick,
+        }
+    };
+
+    //节点 被单击的事件函数处理
+    function zTreeOnClick(event, treeId, treeNode){
+        //显示分类名称 到展示域
+        $('#cat_name').val(treeNode.cat_name);
+        //给 分类表单域(id=cat_id) 设置分类id信息
+        $('#cat_id').val(treeNode.cat_id);
+
+        //隐藏zTree树，取消body绑定的事件
+        $('.contentTree').slideUp(100);
+        $('body').unbind();
+    }
+
+    $(function(){
+        //页面加载完毕，初始化显示树结构
+        //Ajax去服务器端通过数据库获得用于显示的树的数据
+        $.ajax({
+            url:'{:url("category/getcatinfo")}',
+            dataType:'json',
+            success:function(msg){
+                $.fn.zTree.init($("#mytree3"), setting, msg);
+
+                //获得当前被修改商品的分类cat_id信息
+                var cat_id = $('#cat_id').val();
+                var zTree = $.fn.zTree.getZTreeObj("mytree3");//获得 "树对象"
+                //获得被修改商品分类cat_id对应的“树节点”对象，根据cat_id属性
+                var nodes = zTree.getNodesByParam("cat_id", cat_id, null); //返回[{...}]
+                //console.log(nodes);     //数组对象集体现的一个树节点[{...}]
+
+                //通过nodes显示分类名称  到展示域
+                $('#cat_name').val(nodes[0].cat_name);
+
+                //使得nodes的树节点 处于 "选中"状态
+                zTree.selectNode(nodes[0]);
+            }
+        });
+    });
+
+    //点击商品分类“展示域”，显示分类zTree树效果
+    function show_cat_tree(){
+        //获得"分类input"框左上角的位置信息
+        var ps = $('#cat_name').offset();  //返回{left:xx,top:xx}
+        //console.log(ps); //{top: 113, left: 217.5}
+        //获得"分类input"框本身的高度
+        var ht = $('#cat_name').outerHeight();
+        //console.log(ht); //31
+
+        //设置zTree树的位置 并 显示出来
+        $('.contentTree').css({left:ps.left,top:ps.top+ht});
+        $('.contentTree').slideDown(200); //垂直显示
+
+        //给body设置mousedown鼠标按下(无需抬起)事件
+        //当单击“非树区”时要关闭树显示
+        $('body').bind('mousedown',bodydown);
+    }
+
+    //body元素mousedown事件处理函数
+    //@param evt: 事件对象
+    function bodydown(evt){
+        //evt.target: 获得事件触发的“直接”节点本身dom对象
+        //console.log(evt.target);  //dom对象
+        //$().length:获得jquery对象里边有几个dom对象
+
+        //判断单击位置是"非树区"，既没有单击“滚动条”也没有单击“树内部”
+        if(evt.target.className!='contentTree' && $(evt.target).parents('.contentTree').length!=1){
+            //隐藏zTree树，取消body绑定的事件
+            $('.contentTree').slideUp(100);
+            $('body').unbind();
+        }
+    }
+    /*描述大树02*/
+
+
+    //页面加载完毕，就主动调用一次show_attribute3()函数，
+    // 使得可以主动展示被修改商品的属性表单域
+    $(function(){
+        show_attribute3();
+    });
+
+    //类型切换获取显示对应的属性表单域
+    function show_attribute3(){
+        //获得选中类型的type_id信息
+        var type_id  = parseInt($('[name=type_id]').val());
+        var goods_id = parseInt($('[name=goods_id]').val());
+        if(typeof type_id=='undefined'){
+            return false;
+        }
+
+        //通过ajax传递type_id到服务器端获得对应的属性信息
+        $.ajax({
+            url:'{:url("attribute/showattribute3")}',
+            data:{type_id:type_id,goods_id:goods_id},
+            dataType:'json',
+            //type:,
+            success:function(msg){
+                //console.log(msg); //是一个对象，体现为“数组对象集”形式
+                var htmlcont = "";  //声明一个空字符串，存储各个表单域
+                //遍历msg，制作各个属性"表单域"
+                $.each(msg,function(i,v){
+                    if(typeof v.values=='undefined'){
+                        //A. 空壳属性
+                        if(v.attr_sel=='only'){
+                            //1) 唯一属性、普通输入框
+                            htmlcont += '<div class="cl">';
+                            htmlcont += '<label class="form-label col-xs-4 col-sm-3">';
+                            htmlcont += v.attr_name+'：</label>';
+                            htmlcont += '<div class="formControls col-xs-8 col-sm-9">';
+                            htmlcont += '<input type="text" class="input-text" name="shuxing['+v.attr_id+'][]" />';
+                            htmlcont += '</div></div>';
+                        }else{
+                            //2) 单选属性、下拉列表
+                            htmlcont += '<div class="cl">';
+                            htmlcont += '<label class="form-label col-xs-4 col-sm-3">';
+                            htmlcont += '<e onclick="add_item(this)">[+]</e>';
+                            htmlcont += '<span>'+v.attr_name+'：</span></label>';
+                            htmlcont += '<div class="formControls col-xs-8 col-sm-9">';
+                            htmlcont += '<select name="shuxing['+v.attr_id+'][]"><option value="">-请选择-</option>';
+                            //v.attr_vals=白色,黑色,红色
+                            //把可选值 变为Array数组格式
+                            var arr_vals = v.attr_vals.split(',');  //['白色','黑色','红色']
+                            $.each(arr_vals,function(ii,vv){
+                                htmlcont += '<option value="'+vv+'">'+vv+'</option>';
+                            });
+                            htmlcont += '</select>';
+                            htmlcont += '</div></div>';
+                        }
+                    }else{
+                        //B. 实心属性
+                        if(v.attr_sel=='only'){
+                            //1) 唯一属性、普通输入框
+                            htmlcont += '<div class="cl">';
+                            htmlcont += '<label class="form-label col-xs-4 col-sm-3">';
+                            htmlcont += v.attr_name+'：</label>';
+                            htmlcont += '<div class="formControls col-xs-8 col-sm-9">';
+                            htmlcont += '<input type="text" class="input-text" value="'+v['values'][0]+'" name="shuxing['+v.attr_id+'][]" />';
+                            htmlcont += '</div></div>';
+                        }else{
+                            //2) 单选属性、下拉列表
+                            //遍历当前商品的 单选属性 Array数组 值 [白色,黑色]
+                            $.each(v.values,function(iii,vvv){
+                                htmlcont += '<div class="cl">';
+                                htmlcont += '<label class="form-label col-xs-4 col-sm-3">';
+                                //第一个项目是[+]/其余项目是[-]
+                                if(iii===0){
+                                    htmlcont += '<e onclick="add_item(this)">[+]</e>';
+                                }else{
+                                    htmlcont += '<e onclick="$(this).closest(\'.cl\').remove()">[-]</e>';
+                                }
+                                htmlcont += '<span>'+v.attr_name+'：</span></label>';
+                                htmlcont += '<div class="formControls col-xs-8 col-sm-9">';
+                                htmlcont += '<select name="shuxing['+v.attr_id+'][]">';
+                                htmlcont += '<option value="">-请选择-</option>';
+                                //v.attr_vals=白色,黑色,红色
+                                //把可选值 变为Array数组格式
+                                var arr_vals = v.attr_vals.split(',');  //['白色','黑色','红色']
+                                $.each(arr_vals,function(ii,vv){
+                                    //判断商品拥有的属性值选中
+                                    if(vv===vvv){
+                                        htmlcont += '<option value="'+vv+'" selected="selected">'+vv+'</option>';
+                                    }else{
+                                        htmlcont += '<option value="'+vv+'">'+vv+'</option>';
+                                    }
+                                });
+                                htmlcont += '</select>';
+                                htmlcont += '</div></div>';
+                            });
+                        }
+                    }
+                });
+                //删除 原先添加的属性表单域节点
+                $('#goods_type_attr').siblings().remove();
+                //把拼装好的各个属性表单域追加到页面上
+                $('#goods_type_attr').after(htmlcont);
+            }
+        });
+    }
+
+    /*
+      点击“[+]”符号增加 单选属性 表单域
+      obj：代表[+]符号本身的e标签dom对象
+     */
+    function add_item(obj){
+        //复制表单域
+        var fu_dv = $(obj).closest('.cl').clone();
+        //复制品 内部的[+]换成[-]
+        fu_dv.find('e').remove(); //删除本身<e>[+]</e>符号
+        fu_dv.find('span').before('<e onclick="$(this).closest(\'.cl\').remove()">[-]</e>')//追加<e>[-]</e>符号
+        //追加复制品到页面显示
+        $(obj).closest('.cl').after(fu_dv);
+    }
+
+    //设置默认第1个tab标签表单域显示
+    $("#tab-category").Huitab({
+        index:0
+    });
+
+    //设置ueditor编辑器
+    var ue = UE.getEditor('goods_introduce',{toolbars: [[
+        'fullscreen', 'source', '|', 'undo', 'redo', '|',
+        'bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist', 'selectall', 'cleardoc', '|',
+        'rowspacingtop', 'rowspacingbottom', 'lineheight', '|',
+        'customstyle', 'paragraph', 'fontfamily', 'fontsize', '|',
+        'directionalityltr', 'directionalityrtl', 'indent', '|',
+        'justifyleft', 'justifycenter', 'justifyright', 'justifyjustify', '|', 'touppercase', 'tolowercase', '|',
+        'link', 'unlink', 'anchor', '|', 'imagenone', 'imageleft', 'imageright', 'imagecenter', '|',
+        'simpleupload', 'insertimage', 'emotion'
+    ]],lang:"zh-cn"});
+
+
+    //页面加载完毕后，给form表单设置submit提交事件
+    $(function(){
+        $('#form-member-add').submit(function(evt){
+            evt.preventDefault();//阻止浏览器提交动作
+
+            var shuju = $(this).serialize(); //获得表单信息为字符串形式
+
+            //ajax传递数据到服务器端存储
+            $.ajax({
+                url:'{:url("xiugai","",false)}',  // /admin/goods/xiugai
+                data:shuju,
+                dataType:'json',
+                type:'post',
+                success:function(msg){
+                    if(msg.status=='success'){
+                        layer.alert('修改商品成功',{icon:6},function(){
+                            //下述① 和 ②执行执行顺序要求
+                            //① 在"父级"页面把新添加商品刷新出来
+                            parent.window.location.href=parent.window.location.href;
+                            //② 关闭添加商品的弹框表单页面
+                            layer_close();
+                        });
+                    }else{
+                        layer.alert('修改商品失败【'+msg.errorinfo+'】',{icon:5});
+                    }
+                }
+            });
+        });
+    });
+
+</script>
+<!--/请在上方写此页面业务相关的脚本-->

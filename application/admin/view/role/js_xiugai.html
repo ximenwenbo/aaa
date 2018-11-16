@@ -1,0 +1,59 @@
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript">
+    $(function(){
+        //给“权限”上下级复选框设置“关联单击”效果
+        $(".permission-list dt input:checkbox").click(function(){
+            $(this).closest("dl").find("dd input:checkbox").prop("checked",$(this).prop("checked"));
+        });
+        $(".permission-list2 dd input:checkbox").click(function(){
+            var l =$(this).parent().parent().find("input:checked").length;
+            var l2=$(this).parents(".permission-list").find(".permission-list2 dd").find("input:checked").length;
+            if($(this).prop("checked")){
+                $(this).closest("dl").find("dt input:checkbox").prop("checked",true);
+                $(this).parents(".permission-list").find("dt").first().find("input:checkbox").prop("checked",true);
+            }
+            else{
+                if(l==0){
+                    $(this).closest("dl").find("dt input:checkbox").prop("checked",false);
+                }
+                if(l2==0){
+                    $(this).parents(".permission-list").find("dt").first().find("input:checkbox").prop("checked",false);
+                }
+            }
+        });
+    });
+
+
+    //页面加载完毕后，给form表单设置submit提交事件
+    $(function(){
+        $('#form-member-add').submit(function(evt){
+            evt.preventDefault();//阻止浏览器提交动作
+
+            //获得表单信息为字符串形式(普通表单 和 复选框表单 都可以处理)
+            var shuju = $(this).serialize();
+
+            //ajax传递数据到服务器端存储
+            $.ajax({
+                url:'{:url("xiugai","",false)}',  // /admin/role/xiugai
+                data:shuju,
+                dataType:'json',
+                type:'post',
+                success:function(msg){
+                    if(msg.status=='success'){
+                        layer.alert('修改角色成功',{icon:6},function(){
+                            //下述① 和 ②执行执行顺序要求
+                            //① 在"父级"页面把新添加角色刷新出来
+                            parent.window.location.href=parent.window.location.href;
+                            //② 关闭添加角色的弹框表单页面
+                            layer_close();
+                        });
+                    }else{
+                        layer.alert('修改角色失败【'+msg.errorinfo+'】',{icon:5});
+                    }
+                }
+            });
+        });
+    });
+
+</script>
+<!--/请在上方写此页面业务相关的脚本-->

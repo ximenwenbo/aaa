@@ -1,0 +1,61 @@
+{include file="pub/head" /}
+
+<title>分类管理</title>
+
+</head>
+<body>
+
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 分类中心 <span class="c-gray en">&gt;</span> 分类管理 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+
+<!--为zTree树节点的“添加按钮”设置的额外样式-->
+<style type="text/css">
+.ztree li span.button.add {
+    margin-left:2px;
+    margin-right: -1px;
+    background-position:-144px 0;
+    vertical-align:top;
+    *vertical-align:middle
+}
+</style>
+
+<link rel="stylesheet" href="{:config('plugin')}ztree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+<script type="text/javascript" src="{:config('plugin')}ztree/js/jquery.ztree.all.js"></script>
+<div class="page-container">
+    <div style="width:500px;height:320px;float:left;">
+        <ul id="mytree" class="ztree"></ul>
+    </div>
+    <div style="width:300px;height:320px;float:left; cursor:pointer;">
+        <h3 onclick="add_root()">添加根节点</h3>
+    </div>
+
+</div>
+
+{include file="category/js_index" /}
+
+{include file="pub/foot" /}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

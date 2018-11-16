@@ -1,0 +1,172 @@
+{include file="pub/head" /}
+
+<title>订单详情 - H-ui.admin v3.1</title>
+<meta name="keywords" content="H-ui.admin v3.1,H-ui网站后台模版,后台模版下载,后台管理系统模版,HTML后台模版下载">
+<meta name="description" content="H-ui.admin v3.1，是一款由国人开发的轻量级扁平化网站后台模板，完全免费开源的网站后台管理系统模版，适合中小型CMS后台系统。">
+</head>
+<body>
+<article class="page-container">
+	<style type="text/css">
+		table {border:1px solid black; }
+		td {border:1px solid black;}
+	</style>
+	<table width="100%" border="0" cellpadding="0" cellspacing="1" bgcolor="#a8c7ce">
+		<tbody><tr>
+			<td height="20" bgcolor="d3eaef" class="STYLE6" colspan="100">
+				<div align="left"><span class="STYLE19">订单基本信息</span></div>
+			</td>
+		</tr>
+		<tr>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE6">
+				<div align="right"><span class="STYLE19">用户名：</span></div>
+			</td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE19">
+				<div align="left">{$order->user->user_id}</div>
+			</td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE6">
+				<div align="right"><span class="STYLE19">订单编号：</span></div>
+			</td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE19">
+				<div align="left">{$order->order_number}</div>
+			</td>
+		</tr>
+		<tr>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE6">
+				<div align="right"><span class="STYLE19">订单总金额：</span></div>
+			</td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE19">
+				<div align="left">{$order->order_price}</div>
+			</td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE6">
+				<div align="right"><span class="STYLE19">支付方式：</span></div>
+			</td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE19">
+				<div align="left">{$pay_method[$order->order_pay]}</div>
+			</td>
+		</tr>
+		<tr>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE6">
+				<div align="right"><span class="STYLE19">订单是否付款：</span></div>
+			</td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE19">
+				<div align="left">
+					{$order.order_status ? '<span class="btn btn-success radius">是</span>':'<span class="btn btn-warning radius">否</span>'}
+				</div>
+			</td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE6">
+				<div align="right"><span class="STYLE19">下单时间：</span></div>
+			</td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE19">
+				<div align="left">{$order.create_time}</div>
+			</td>
+		</tr>
+		<tr>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE6">
+				<div align="right"><span class="STYLE19">收货人名称：</span></div>
+			</td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE19">
+				<div align="left">{$cgninfo.cgn_name}</div>
+			</td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE6">
+				<div align="right"><span class="STYLE19">地址：</span></div>
+			</td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE19">
+				<div align="left" id="cgn_address">{$cgninfo.cgn_address}</div>
+			</td>
+		</tr>
+		<tr>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE6">
+				<div align="right"><span class="STYLE19">联系电话：</span></div>
+			</td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE19">
+				<div align="left">{$cgninfo.cgn_tel}</div>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+
+	<table width="100%" border="0" cellpadding="0" cellspacing="1" style="margin-top:5px;">
+		<tbody><tr>
+			<td height="20" bgcolor="d3eaef" class="STYLE6" colspan="100">
+				<div align="left"><span class="STYLE19">订单关联商品信息</span></div>
+			</td>
+		</tr>
+		<tr style="font-weight: bold;">
+			<td width="5%" height="20" class="STYLE6">
+				<div align="center"><span class="STYLE10">商品id</span></div>
+			</td>
+			<td width="10%" height="20" class="STYLE6">
+				<div align="center"><span class="STYLE10">商品名称</span></div>
+			</td>
+			<td width="10%" height="20" class="STYLE6">
+				<div align="center"><span class="STYLE10">附加属性</span></div>
+			</td>
+			<td width="7%" height="20" class="STYLE6">
+				<div align="center"><span class="STYLE10">商品单价</span></div>
+			</td>
+			<td width="5%" height="20" class="STYLE6">
+				<div align="center"><span class="STYLE10">购买数量</span></div>
+			</td>
+			<td width="8%" height="20" class="STYLE6">
+				<div align="center"><span class="STYLE10">小计价格</span></div>
+			</td>
+		</tr>
+		{volist name='goodsinfos' id='v'}
+		<tr>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE6">
+				<div align="center"><span class="STYLE19">{$v.goods_id}</span></div></td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE19">
+				<div align="center">{$v.goods.goods_name}</div></td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE19">
+				<div align="left">
+					{volist name='v.goods_attrs' id='vv'}
+					【{$attrinfos[$key]}:{$vv}】
+					{/volist}
+				</div></td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE19">
+				<div align="center">{$v.goods_price}</div></td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE19">
+				<div align="center">{$v.goods_number}</div></td>
+			<td height="20" bgcolor="#FFFFFF" class="STYLE19">
+				<div align="center">{$v.goods_price_sum}</div></td>
+		</tr>
+		{/volist}
+
+		</tbody>
+	</table>
+
+	<!--地图应用1-->
+	<script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp"></script>
+	<div style="width:100%;height:500px;background-color:lightblue;margin-top:5px;border:1px solid black;"
+		 id="address_map"></div>
+	<!--地图应用1-->
+</article>
+
+{include file='order/js_detail' /}
+
+{include file="pub/foot" /}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

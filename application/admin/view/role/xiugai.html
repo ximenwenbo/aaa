@@ -1,0 +1,97 @@
+{include file="pub/head" /}
+
+<title>修改角色 - H-ui.admin v3.1</title>
+<meta name="keywords" content="H-ui.admin v3.1,H-ui网站后台模版,后台模版下载,后台管理系统模版,HTML后台模版下载">
+<meta name="description" content="H-ui.admin v3.1，是一款由国人开发的轻量级扁平化网站后台模板，完全免费开源的网站后台管理系统模版，适合中小型CMS后台系统。">
+</head>
+<body>
+<article class="page-container">
+	<form action="" method="post" class="form form-horizontal" id="form-member-add">
+		<input type="hidden" name="role_id" value="{$role.role_id}" />
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>角色名称：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" value="{$role.role_name}"
+					   id="role_name" name="role_name" />
+			</div>
+		</div>
+
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">访问权限：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				{volist name='ps_infoA' id='v'}
+				<dl class="permission-list">
+					<dt><label>
+							<input type="checkbox" value="{$v.ps_id}" name="quanxian[]"
+								   id="user-Character-0"
+									{in name="v.ps_id" value="$role.role_ps_ids"} checked="checked" {/in}
+							/>{$v.ps_name}</label>
+					</dt>
+					<dd>
+						{volist name='ps_infoB' id='vv'}
+						{eq name='vv.ps_pid' value='$v.ps_id'}
+						<dl class="cl permission-list2">
+							<dt><label class="">
+									<input type="checkbox" value="{$vv.ps_id}" name="quanxian[]"
+										   id="user-Character-0-0"
+										   {in name="vv.ps_id" value="$role.role_ps_ids"} checked="checked" {/in}
+									/>{$vv.ps_name}</label>
+							</dt>
+							<dd>
+								{volist name='ps_infoC' id='vvv'}
+								{eq name='vvv.ps_pid' value='$vv.ps_id'}
+								<label class="">
+									<input type="checkbox" value="{$vvv.ps_id}" name="quanxian[]"
+										   id="user-Character-0-0-0"
+										   {in name="vvv.ps_id" value="$role.role_ps_ids"} checked="checked" {/in}
+									/>{$vvv.ps_name}</label>
+								{/eq}
+								{/volist}
+							</dd>
+						</dl>
+						{/eq}
+						{/volist}
+					</dd>
+				</dl>
+				{/volist}
+			</div>
+		</div>
+
+
+		<div class="row cl">
+			<div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+				<input class="btn btn-primary radius" type="submit" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">
+			</div>
+		</div>
+	</form>
+</article>
+
+{include file="role/js_xiugai" /}
+
+{include file="pub/foot" /}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

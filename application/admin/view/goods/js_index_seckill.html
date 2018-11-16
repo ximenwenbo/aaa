@@ -1,0 +1,40 @@
+<script type="text/javascript">
+//页面加载完毕，给各个秒杀商品计算“倒计时”信息显示
+
+$(function(){
+    $("[id^='goodssec_']").each(function(i,v){
+        //v: 被遍历出来的具体dom元素对象
+        var end_time = $(v).val(); //获得商品秒杀结束时间
+        //设置当前时间到js变量中
+        var now_time = <?php echo time(); ?>;
+
+        //每秒钟显示一次"倒计时"时间
+        window.setInterval(function(){
+            var cha = end_time-now_time;
+            var show_back = getDHMS(cha);  //计算好的倒计时信息
+            now_time++;
+
+            //显示倒计时到页面
+            var goods_id = ($(v).attr('id').split('_'))[1]//计算当前goods_id
+            $('#backtime_'+goods_id).html(show_back);
+        },1000);
+    });
+});
+
+/**
+ * @param difftime 时间差值
+ * @return 返回 “天 小时 分钟 秒” 的信息
+ */
+function getDHMS(difftime){
+    var day     = 60*60*24;     //1天的时间戳
+    var hour    = 60*60;        //1小时的时间戳
+    var minute  = 60;           //1分钟的时间戳
+
+    var days        = parseInt(difftime / day);              //计算有几个天
+    var hours       = parseInt(difftime % day / hour);       //抛开天，剩余多少小时
+    var minutes     = parseInt(difftime % hour / minute);    //抛开小时，剩余几分钟
+    var seconds     = parseInt(difftime % minute);           //抛开分钟，剩余几秒
+    return days+'天'+hours+'小时'+minutes+'分钟'+seconds+'秒';
+}
+
+</script>
